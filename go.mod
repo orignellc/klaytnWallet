@@ -1,4 +1,4 @@
-module klaytnWallet
+module github.com/orignellc/klaytnWallet
 
 go 1.18
 
