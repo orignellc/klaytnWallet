@@ -19,21 +19,21 @@ import (
 
 var NilAddress = common.Address{}
 
-type Gp2pWalletOptions struct {
+type WalletOptions struct {
 	RpcUrl           string
 	Address          common.Address
 	SignerPrivateKey string
 }
 
-type Gp2pWalletAdapter struct {
+type WalletAdapter struct {
 	client   *client.Client
 	contract *contracts.GlobalP2P
 	abi      *abi.ABI
 	address  common.Address
-	options  *Gp2pWalletOptions
+	options  *WalletOptions
 }
 
-func NewKlaytnGp2pContractWithClient(options *Gp2pWalletOptions) *Gp2pWalletAdapter {
+func NewWalletAdapterWithClient(options *WalletOptions) *WalletAdapter {
 	connection, err := ConnectKlaytonClient(options.RpcUrl)
 	if err != nil {
 		panic(err)
@@ -47,14 +47,14 @@ func NewKlaytnGp2pContractWithClient(options *Gp2pWalletOptions) *Gp2pWalletAdap
 		panic(err)
 	}
 
-	return NewKlaytnGp2pContract(connection, gp2pAbi, globalP2P, options)
+	return NewWalletAdapter(connection, gp2pAbi, globalP2P, options)
 }
 
-func NewKlaytnGp2pContract(client *client.Client, abi *abi.ABI, gp2p *contracts.GlobalP2P, options *Gp2pWalletOptions) *Gp2pWalletAdapter {
-	return &Gp2pWalletAdapter{client: client, abi: abi, contract: gp2p, options: options}
+func NewWalletAdapter(client *client.Client, abi *abi.ABI, gp2p *contracts.GlobalP2P, options *WalletOptions) *WalletAdapter {
+	return &WalletAdapter{client: client, abi: abi, contract: gp2p, options: options}
 }
 
-func (g *Gp2pWalletAdapter) CreateWallet(userID string) (string, error) {
+func (g *WalletAdapter) CreateWallet(userID string) (string, error) {
 	opt, _ := g.transactOpt(big.NewInt(0))
 
 	//var params []interface{}
@@ -76,7 +76,7 @@ func (g *Gp2pWalletAdapter) CreateWallet(userID string) (string, error) {
 	return address, nil
 }
 
-func (g *Gp2pWalletAdapter) GetWalletAddressFor(userId string) (string, error) {
+func (g *WalletAdapter) GetWalletAddressFor(userId string) (string, error) {
 	opts := &bind.CallOpts{Context: context.Background()}
 
 	address, err := g.contract.Wallets(opts, userId)
@@ -87,7 +87,7 @@ func (g *Gp2pWalletAdapter) GetWalletAddressFor(userId string) (string, error) {
 	return address.String(), nil
 }
 
-func (g *Gp2pWalletAdapter) transactOpt(value *big.Int) (*bind.TransactOpts, error) {
+func (g *WalletAdapter) transactOpt(value *big.Int) (*bind.TransactOpts, error) {
 	signer, _, publicKeyECDSA, err := g.getSigner()
 	if err != nil {
 		return nil, err
@@ -124,7 +124,7 @@ func (g *Gp2pWalletAdapter) transactOpt(value *big.Int) (*bind.TransactOpts, err
 	return auth, nil
 }
 
-func (g *Gp2pWalletAdapter) getSigner() (*ecdsa.PrivateKey, crypto.PublicKey, *ecdsa.PublicKey, error) {
+func (g *WalletAdapter) getSigner() (*ecdsa.PrivateKey, crypto.PublicKey, *ecdsa.PublicKey, error) {
 	privateKey, err := crypto2.HexToECDSA(g.options.SignerPrivateKey)
 	if err != nil {
 		panic(err)
@@ -141,7 +141,7 @@ func (g *Gp2pWalletAdapter) getSigner() (*ecdsa.PrivateKey, crypto.PublicKey, *e
 	return privateKey, publicKey, publicKeyECDSA, err
 }
 
-func (g *Gp2pWalletAdapter) estimateGasUsage(methodName string, methodArgs []interface{}) uint64 {
+func (g *WalletAdapter) estimateGasUsage(methodName string, methodArgs []interface{}) uint64 {
 
 	var interfaceArgs []interface{}
 	interfaceArgs = append(interfaceArgs, methodArgs...)
