@@ -1,4 +1,4 @@
-package klaytn
+package klaytnWallet
 
 import (
 	"context"
@@ -12,7 +12,7 @@ import (
 	"github.com/klaytn/klaytn/client"
 	"github.com/klaytn/klaytn/common"
 	crypto2 "github.com/klaytn/klaytn/crypto"
-	"klaytnWallet/contracts"
+	"github.com/orignellc/klaytnWallet/contracts"
 	"log"
 	"math/big"
 )
